@@ -1,16 +1,14 @@
+using API.Extensions;
+using Contracts;
+using DataModel;
+using Infrastructure;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace DepartmentEmployees
 {
@@ -27,7 +25,16 @@ namespace DepartmentEmployees
         public void ConfigureServices(IServiceCollection services)
         {
 
+            services.ConfigureCors();
+            services.ConfigureSqlContext(Configuration);
+
             services.AddControllers();
+
+            services.AddScoped(typeof(DbContext), typeof(RepositoryDbContext));
+
+            services.AddScoped(typeof(IEmployee), typeof(EmployeeRepository));
+            services.AddScoped(typeof(IDepartment), typeof(DepartmentRepository));
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "DepartmentEmployees", Version = "v1" });
@@ -45,6 +52,8 @@ namespace DepartmentEmployees
             }
 
             app.UseHttpsRedirection();
+
+            app.UseCors("AddPolicy");
 
             app.UseRouting();
 
